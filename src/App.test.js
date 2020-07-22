@@ -1,7 +1,8 @@
 import React from 'react';
-import { screen, render, waitFor, fireEvent } from "@testing-library/react";
+import { screen, render, waitFor, fireEvent, act } from "@testing-library/react";
 import App from './App';
 import {fetchShow} from './api/fetchShow';
+import userEvent from '@testing-library/user-event'
 
 const episodesData ={data: {
     id: 2993,
@@ -604,29 +605,46 @@ const episodesData ={data: {
 
 jest.mock("./api/fetchShow");
 
-test("successfully renders data from api", async () => {
+// test("successfully renders data from api", async () => {
+//     fetchShow.mockResolvedValueOnce(episodesData);
+//     render(<App />)
+//     screen.findByText(/Fetching data.../i);
+//     const button = await screen.findByText(/Select a season/i);
+
+//     await waitFor(() => {
+//         fireEvent.click(screen.getByText(/Select a season/i)); 
+
+//        screen.getAllByText(/season/i)
+//     });
+//     expect(screen.getAllByText(/season/i)).toHaveLength(5);
+//     expect(fetchShow).toHaveBeenCalled(); 
+//   });
+
+  // test('data is fetched and rendered correctly', () => {
+  //     fetchShow.mockResolvedValueOnce(episodesData)
+  //     render(<App />);
+  //     userEvent.click(screen.getByText(/Select a season/i));
+  //     await waitFor(() => {
+  //         expect(fetchShow).toHaveBeenCalledTimes(1)
+  //     });
+  //     screen.findByText(/Chapter One: The Vanishing of Will Byers/i);
+  //     expect(screen.getAllByTestId(""))
+  // })
+
+  test('seasons show when menu is clicked', async() => {
     fetchShow.mockResolvedValueOnce(episodesData);
-    render(<App />)
-    screen.findByText(/Fetching data.../i);
-    const button = await screen.findByText(/Select a season/i);
+    
+     act( () => {
+      render(<App />);
+    })
 
-    await waitFor(() => {
-        fireEvent.click(screen.getByText(/Select a season/i)); 
+    expect(screen.getByText(/Select a season/i)).toBeInTheDocument()
+    userEvent.click(screen.getByText(/select a season/i))
 
-       screen.getAllByText(/season/i)
-    });
-    expect(screen.getAllByText(/season/i)).toHaveLength(5);
-    expect(fetchShow).toHaveBeenCalled(); 
-  });
+    expect(screen.getAllByText(/season/i)).toHaveLength(5)
 
-//   test('data is fetched and rendered correctly', () => {
-//       fetchShow.mockResolvedValueOnce(episodesData)
-//       render(<App />);
-//       userEvent.click(screen.getByText(/Select a season/i));
-//       await waitFor(() => {
-//           expect(fetchShow).toHaveBeenCalledTimes(1)
-//       });
-//       screen.findByText(/Chapter One: The Vanishing of Will Byers/i);
-//       expect(screen.getAllByTestId(""))
-//   })
+    userEvent.click(screen.getByText(/season 1/i))
+    expect(screen.getByText(/episode 1/i)).toBeInTheDocument();
 
+    expect(screen.getAllByText(/episode/i)).toHaveLength(8)
+  })
